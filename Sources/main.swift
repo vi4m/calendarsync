@@ -1,10 +1,7 @@
-
 import EventKit
 import NotificationCenter
 
 let eventStore = EKEventStore()
-
-
 
 class Synchronizer {
     
@@ -17,8 +14,13 @@ class Synchronizer {
         print("Changed!")
         
     }
-    
+   
+ 
     init() {
+	guard #available(macOS 10.12, *) else {
+		fatalError("Macos sierra is supported!")
+	}
+
         let path = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".calendarsync.json")
         guard let data = try? Data(contentsOf: path) else {
             print("Cannot read ~/.calendarsync.json. Choose privateCalendar and officeCalendar from list: ")
@@ -30,7 +32,8 @@ class Synchronizer {
         }
         
         guard let json = try? JSONSerialization.jsonObject(with: data)  else {
-            fatalError("Can't read ~/.calendarsync.json")
+            print("Can't read ~/.calendarsync.json")
+	    exit(4)
         }
         
         if  let json = json as? [String: Any]  {
@@ -42,7 +45,8 @@ class Synchronizer {
             }
         }
         
-        fatalError("privateCalendar and officeCalendar have to be set to calendar ID's. For example: 1BA1FFED-17F7-48D1-BA07-3D207D8C5C12")
+        print("privateCalendar and officeCalendar have to be set to calendar ID's. For example: 1BA1FFED-17F7-48D1-BA07-3D207D8C5C12")
+	exit(5)
     }
     
     func register() {
@@ -76,7 +80,8 @@ class Synchronizer {
     func start() {
         
         if(self.privateCalendar.source.title != "iCloud") {
-            fatalError("Private calendar should be iCloud!")
+            print("Private calendar should be iCloud!")
+	    exit(7)
         }
         print(Date().addingTimeInterval(TimeInterval(-60*60*24*30)))
         copyOfficeEvents()
