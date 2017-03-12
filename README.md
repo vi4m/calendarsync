@@ -22,8 +22,5 @@ I created this script to help me transfer business calendars events to my shiny 
 		"privateCalendar": "1BA1FFED-17F7-48D1-BA07-3D207D8C5C16",
 		"officeCalendar": "64362FAC-8DFF-485A-991B-B23B84D14D69"
 	}
-```
-
-   where officeCalendar is the ID of the calendar with all source business meetings. 
-
+``` where officeCalendar is the ID of the calendar with all source business meetings. 
 4. Launch program from console. It will show logs, and will copy all business meetings from next 2 days to your iCloud calendar.
