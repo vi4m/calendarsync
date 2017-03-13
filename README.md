@@ -14,7 +14,7 @@ I created this script to help me transfer business calendars events to my shiny 
 
 
 1. Create new iCloud calendar using iCal app. Name it somehow. 
-2. Run app. When run the first time, it will dump all calendars ID's. Your newly created iCloud cal will hold all copied business events. 
+2. Run app. When run the first time, it will dump all calendars ID's. Your newly created iCloud cal will act as a 'privateCalendar', to store all events copied from business calendar. 
 3. Create ~/.calendarsync.json similar to: 
 ```
 {
