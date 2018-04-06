@@ -8,7 +8,7 @@ class Synchronizer {
     var privateCalendar: EKCalendar
     var officeCalendar: EKCalendar
     
-    let daysToSynchronize = 5
+    let daysToSynchronize = 10
     
     @objc func storeChanged() {
         print("Changed!")
