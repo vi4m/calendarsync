@@ -14,11 +14,10 @@ class Synchronizer {
         print("Changed!")
         
     }
-   
  
     init() {
 	guard #available(macOS 10.12, *) else {
-		fatalError("Macos sierra is supported!")
+		fatalError("Macos Sierra is required!")
 	}
 
         let path = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".calendarsync.json")
