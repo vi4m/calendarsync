@@ -3,7 +3,6 @@ import NotificationCenter
 
 let eventStore = EKEventStore()
 
-
 public struct Config: Codable {
     var privateCalendar: String
     var officeCalendar: String
@@ -38,7 +37,7 @@ class Synchronizer {
 
         let entry = try! coder.decode(Config.self, from: data)
         if let days = entry.daysToSync {
-            self.daysToSynchronize = days
+            daysToSynchronize = days
         }
 
         guard let privateCalendar = eventStore.calendar(withIdentifier: entry.privateCalendar) else {
