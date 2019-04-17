@@ -3,11 +3,18 @@ import NotificationCenter
 
 let eventStore = EKEventStore()
 
+
+public struct Config: Codable {
+    var privateCalendar: String
+    var officeCalendar: String
+    var daysToSync: Int?
+}
+
 class Synchronizer {
     var privateCalendar: EKCalendar
     var officeCalendar: EKCalendar
 
-    let daysToSynchronize = 10
+    var daysToSynchronize = 10
 
     @objc func storeChanged() {
         print("Changed!")
@@ -27,22 +34,23 @@ class Synchronizer {
             exit(3)
         }
 
-        guard let json = try? JSONSerialization.jsonObject(with: data) else {
-            print("Can't read ~/.calendarsync.json")
-            exit(4)
+        let coder = JSONDecoder()
+
+        let entry = try! coder.decode(Config.self, from: data)
+        if let days = entry.daysToSync {
+            self.daysToSynchronize = days
         }
 
-        if let json = json as? [String: Any] {
-            if let privateId = json["privateCalendar"] as? String,
-                let officeId = json["officeCalendar"] as? String {
-                privateCalendar = eventStore.calendar(withIdentifier: privateId)!
-                officeCalendar = eventStore.calendar(withIdentifier: officeId)!
-                return
-            }
+        guard let privateCalendar = eventStore.calendar(withIdentifier: entry.privateCalendar) else {
+            print("Unknown calendar: \(entry.privateCalendar)")
+            exit(3)
         }
-
-        print("privateCalendar and officeCalendar have to be set to calendar ID's. For example: 1BA1FFED-17F7-48D1-BA07-3D207D8C5C12")
-        exit(5)
+        self.privateCalendar = privateCalendar
+        guard let officeCalendar = eventStore.calendar(withIdentifier: entry.officeCalendar) else {
+            print("Unknown calendar: \(entry.officeCalendar)")
+            exit(3)
+        }
+        self.officeCalendar = officeCalendar
     }
 
     func register() {
@@ -83,13 +91,13 @@ class Synchronizer {
     func copyOfficeEvents() {
         let officeEvents = getLastEvents(calendar: officeCalendar)
         for event in officeEvents {
-            print(event.title)
+            print(event.title ?? "no title")
             let alreadySyncedEvent = eventStore.events(matching: eventStore.predicateForEvents(withStart: event.startDate, end: event.endDate, calendars: [privateCalendar]))
 
             guard (alreadySyncedEvent.filter {
                 $0.title == event.title
             }.count == 0) else {
-                print("Already synchronized: \(event.title). Skipping.")
+                print("Already synchronized: \(event.title ?? "no title"). Skipping.")
                 continue
             }
 
@@ -101,9 +109,9 @@ class Synchronizer {
             newevent.isAllDay = event.isAllDay
             newevent.calendar = privateCalendar
 
-            let x = "\(newevent.attendees)"
+            let x = "\(String(describing: newevent.attendees))"
             newevent.notes = "\(event.notes ?? "") Attendees: " + x
-            print("Add: \(newevent.title)")
+            print("Add: \(String(describing: newevent.title))")
             try? eventStore.save(newevent, span: .thisEvent, commit: true)
         }
     }
@@ -111,7 +119,7 @@ class Synchronizer {
     func removePrivateEventsWithoutOfficeEvents() {
         let privateEvents = getLastEvents(calendar: privateCalendar)
         for event in privateEvents {
-            print(event.title)
+            print(event.title ?? "no title")
             let officeExisting = eventStore.events(matching: eventStore.predicateForEvents(withStart: event.startDate, end: event.endDate, calendars: [officeCalendar]))
 
             let existing = officeExisting.filter {
@@ -119,7 +127,7 @@ class Synchronizer {
             }
 
             if existing.count == 0 {
-                print("Removing \(event.title)!")
+                print("Removing \(String(describing: event.title))!")
                 try? eventStore.remove(event, span: .thisEvent, commit: true)
             }
         }
